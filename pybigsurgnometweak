@@ -24,6 +24,7 @@ import os
 import subprocess
 import time
 import dbus
+import sys
 import gi
 from gi.repository import GLib,Gio
 
@@ -43,46 +44,6 @@ def init_check():
         sys.exit("Your Desktop Is Not gnome shell")
 
 
-
-extensions_to_enable = ["user-theme@gnome-shell-extensions.gcampax.github.com",
-                        "clipboard-indicator@tudmotu.com",
-                        "CoverflowAltTab@palatis.blogspot.com",
-                        "dash-to-dock@micxgx.gmail.com",
-                        "drive-menu@gnome-shell-extensions.gcampax.github.com",
-                        "background-logo@fedorahosted.org"]
-
-             
-       
-
-gsettings =    [ ["org.gnome.desktop.background"              , "show-desktop-icons",GLib.Variant('b',False)] ,
-                ["org.gnome.desktop.background"               , "picture-uri",GLib.Variant('s',"file://{}".format(wallpaper))] ,
-                ["org.gnome.desktop.screensaver"              , "picture-uri",GLib.Variant('s',"file://{}".format(wallpaper))] ,
-                ["org.gnome.desktop.interface"                , "icon-theme",GLib.Variant('s',theme_icon)] ,
-                ["org.gnome.shell.extensions.user-theme"      , "name",GLib.Variant('s',theme_gnome)] ,
-                ["org.gnome.desktop.interface"                , "gtk-theme",GLib.Variant('s',theme_gtk)] ,
-                ["org.gnome.desktop.interface"                , "enable-animations",GLib.Variant('b',True)] ,
-                ["org.gnome.desktop.wm.preferences"           , "button-layout",GLib.Variant('s',":minimize,close")] ,
-                ["org.gnome.Terminal.Legacy.Settings"         , "theme-variant",GLib.Variant('s',"dark")] ,
-                ["org.gnome.Terminal.Legacy.Settings"         , "default-show-menubar",GLib.Variant('b',False)],
-                ["org.fedorahosted.background-logo-extension" , "logo-always-visible",GLib.Variant('b',True)],
-                ["org.fedorahosted.background-logo-extension" , "logo-file",GLib.Variant('s',"file:///usr/share/fedora-logos/fedora_logo.svg")],
-                ["org.fedorahosted.background-logo-extension" , "logo-opacity",GLib.Variant('u',255)],
-                ["org.fedorahosted.background-logo-extension" , "logo-border",GLib.Variant('u',20)],
-                ["org.gnome.shell"                            , "disable-user-extensions",GLib.Variant('b',False)]
-               ]
-
-
-            
-gnome_terminal =      [[ "use-theme-colors" , GLib.Variant('b',False)] ,
-                      [ "use-system-font" , GLib.Variant('b',False)] ,
-                      [ "background-color" , GLib.Variant('s',"#2B2B2B")] ,
-                      [ "font" , GLib.Variant('s',"Monospace 10")] ,\
-                      [ "foreground-color" , GLib.Variant('s',"#FFFFFF")] ,
-                      [ "cursor-background-color" , GLib.Variant('s',"#EF2929")] ,
-                      [ "cursor-colors-set" ,GLib.Variant('b',True)] ,
-                      [ "background-transparency-percent" , GLib.Variant('i',5)] ,
-                      [ "use-transparent-background" , GLib.Variant('b',True)]
-                    ]
                     
 def if_theme_exists(name):
     loctions = (os.path.join(GLib.get_user_data_dir(),"themes"),os.path.join(GLib.get_home_dir(),".themes"),"/usr/share/themes")
@@ -193,9 +154,44 @@ class GnomeShell(object):
         self.__settings.set_strv("enabled-extensions", ex)
 
 
+def msg(m):
+    while True:
+        subprocess.call("clear")
+        print()
+        print(m)
+        print("\nY To Continue || N To Quit : \n-",end="")
+        y_n=input().strip()
+        if y_n=="Y" or y_n=="y":
+            break
+        elif y_n=="n" or y_n=="N":
+            sys.exit("\nBye...\n")
+            
+def msg_themes():
+    themes = ( "1- Light theme.","2- Dark theme.")
+    while True:
+        subprocess.call("clear")
+        print()
+        for i in themes:
+            print(i)
 
+        print("\nchoose theme (1-2) ? \n-",end="")
+        answer=input().strip()
+        if answer == "1":
+            break
+        elif answer == "2":
+            global theme_gtk
+            global theme_gnome
+            global theme_icon
+            theme_gtk         = "WhiteSur-dark-alt"
+            theme_gnome       = "WhiteSur-dark-alt"
+            theme_icon        = "BigSur-dark"
+            break
+        else:
+            continue            
 def main():
     init_check()
+    msg("Pybigsurgnometweak Python Script To change Gnome Shell look . \n\nhttps://arfedora.blogspot.com\nhttps://github.com/yucefsourani/pybigsurgnometweak\n\nWarning !! Use This Script on Your own Risk\nAre you sure you want continue?")
+    msg_themes()
     if not if_theme_exists(theme_gtk):
         print("Gtk Theme {} Not Available.".format(theme_gtk))
         return
@@ -215,7 +211,47 @@ def main():
     if not os.path.isfile(wallpaper):
         print("Wallpaper {} Not Available.".format(wallpaper))
         return
-        
+
+    extensions_to_enable = ["user-theme@gnome-shell-extensions.gcampax.github.com",
+                            "clipboard-indicator@tudmotu.com",
+                            "CoverflowAltTab@palatis.blogspot.com",
+                            "dash-to-dock@micxgx.gmail.com",
+                            "drive-menu@gnome-shell-extensions.gcampax.github.com",
+                            "background-logo@fedorahosted.org"]
+
+                 
+           
+
+    gsettings =    [ ["org.gnome.desktop.background"              , "show-desktop-icons",GLib.Variant('b',False)] ,
+                    ["org.gnome.desktop.background"               , "picture-uri",GLib.Variant('s',"file://{}".format(wallpaper))] ,
+                    ["org.gnome.desktop.screensaver"              , "picture-uri",GLib.Variant('s',"file://{}".format(wallpaper))] ,
+                    ["org.gnome.desktop.interface"                , "icon-theme",GLib.Variant('s',theme_icon)] ,
+                    ["org.gnome.shell.extensions.user-theme"      , "name",GLib.Variant('s',theme_gnome)] ,
+                    ["org.gnome.desktop.interface"                , "gtk-theme",GLib.Variant('s',theme_gtk)] ,
+                    ["org.gnome.desktop.interface"                , "enable-animations",GLib.Variant('b',True)] ,
+                    ["org.gnome.desktop.wm.preferences"           , "button-layout",GLib.Variant('s',":minimize,close")] ,
+                    ["org.gnome.Terminal.Legacy.Settings"         , "theme-variant",GLib.Variant('s',"dark")] ,
+                    ["org.gnome.Terminal.Legacy.Settings"         , "default-show-menubar",GLib.Variant('b',False)],
+                    ["org.fedorahosted.background-logo-extension" , "logo-always-visible",GLib.Variant('b',True)],
+                    ["org.fedorahosted.background-logo-extension" , "logo-file",GLib.Variant('s',"file:///usr/share/fedora-logos/fedora_logo.svg")],
+                    ["org.fedorahosted.background-logo-extension" , "logo-opacity",GLib.Variant('u',255)],
+                    ["org.fedorahosted.background-logo-extension" , "logo-border",GLib.Variant('u',20)],
+                    ["org.gnome.shell"                            , "disable-user-extensions",GLib.Variant('b',False)]
+                   ]
+
+
+                
+    gnome_terminal =      [[ "use-theme-colors" , GLib.Variant('b',False)] ,
+                          [ "use-system-font" , GLib.Variant('b',False)] ,
+                          [ "background-color" , GLib.Variant('s',"#2B2B2B")] ,
+                          [ "font" , GLib.Variant('s',"Monospace 10")] ,\
+                          [ "foreground-color" , GLib.Variant('s',"#FFFFFF")] ,
+                          [ "cursor-background-color" , GLib.Variant('s',"#EF2929")] ,
+                          [ "cursor-colors-set" ,GLib.Variant('b',True)] ,
+                          [ "background-transparency-percent" , GLib.Variant('i',5)] ,
+                          [ "use-transparent-background" , GLib.Variant('b',True)]
+                        ]
+    print("\nPlease Wait.\n")
     gnome =  GnomeShell()
     extensions_to_install = list()
     all_extension = gnome.list_extensions().keys()
