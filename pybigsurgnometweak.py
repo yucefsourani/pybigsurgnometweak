@@ -1,0 +1,247 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+#  
+#  Copyright 2020 youcef sourani <youssef.m.sourani@gmail.com>
+#  
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301, USA.
+#  
+#  
+import os
+import subprocess
+import time
+import dbus
+import gi
+from gi.repository import GLib,Gio
+
+
+
+wallpaper         = "/usr/share/wallpapers/sur-white-Wallpaper.jpg"
+theme_gtk         = "WhiteSur-light-alt"
+theme_gnome       = "WhiteSur-light-alt"
+theme_icon        = "BigSur"
+theme_cursor_icon = "McMojave-cursors"
+
+def init_check():
+    if os.getuid()==0:
+        sys.exit("Run Script Without Root Permissions.")
+
+    if "GNOME" not in os.getenv("XDG_CURRENT_DESKTOP"):
+        sys.exit("Your Desktop Is Not gnome shell")
+
+
+
+extensions_to_enable = ["user-theme@gnome-shell-extensions.gcampax.github.com",
+                        "clipboard-indicator@tudmotu.com",
+                        "CoverflowAltTab@palatis.blogspot.com",
+                        "dash-to-dock@micxgx.gmail.com",
+                        "drive-menu@gnome-shell-extensions.gcampax.github.com",
+                        "background-logo@fedorahosted.org"]
+
+             
+       
+
+gsettings =    [ ["org.gnome.desktop.background"              , "show-desktop-icons",GLib.Variant('b',False)] ,
+                ["org.gnome.desktop.background"               , "picture-uri",GLib.Variant('s',"file://{}".format(wallpaper))] ,
+                ["org.gnome.desktop.screensaver"              , "picture-uri",GLib.Variant('s',"file://{}".format(wallpaper))] ,
+                ["org.gnome.desktop.interface"                , "icon-theme",GLib.Variant('s',theme_icon)] ,
+                ["org.gnome.shell.extensions.user-theme"      , "name",GLib.Variant('s',theme_gnome)] ,
+                ["org.gnome.desktop.interface"                , "gtk-theme",GLib.Variant('s',theme_gtk)] ,
+                ["org.gnome.desktop.interface"                , "enable-animations",GLib.Variant('b',True)] ,
+                ["org.gnome.desktop.wm.preferences"           , "button-layout",GLib.Variant('s',":minimize,close")] ,
+                ["org.gnome.Terminal.Legacy.Settings"         , "theme-variant",GLib.Variant('s',"dark")] ,
+                ["org.gnome.Terminal.Legacy.Settings"         , "default-show-menubar",GLib.Variant('b',False)],
+                ["org.fedorahosted.background-logo-extension" , "logo-always-visible",GLib.Variant('b',True)],
+                ["org.fedorahosted.background-logo-extension" , "logo-file",GLib.Variant('s',"file:///usr/share/fedora-logos/fedora_logo.svg")],
+                ["org.fedorahosted.background-logo-extension" , "logo-opacity",GLib.Variant('u',255)],
+                ["org.fedorahosted.background-logo-extension" , "logo-border",GLib.Variant('u',20)],
+                ["org.gnome.shell"                            , "disable-user-extensions",GLib.Variant('b',False)]
+               ]
+
+
+            
+gnome_terminal =      [[ "use-theme-colors" , GLib.Variant('b',False)] ,
+                      [ "use-system-font" , GLib.Variant('b',False)] ,
+                      [ "background-color" , GLib.Variant('s',"#2B2B2B")] ,
+                      [ "font" , GLib.Variant('s',"Monospace 10")] ,\
+                      [ "foreground-color" , GLib.Variant('s',"#FFFFFF")] ,
+                      [ "cursor-background-color" , GLib.Variant('s',"#EF2929")] ,
+                      [ "cursor-colors-set" ,GLib.Variant('b',True)] ,
+                      [ "background-transparency-percent" , GLib.Variant('i',5)] ,
+                      [ "use-transparent-background" , GLib.Variant('b',True)]
+                    ]
+                    
+def if_theme_exists(name):
+    loctions = (os.path.join(GLib.get_user_data_dir(),"themes"),os.path.join(GLib.get_home_dir(),".themes"),"/usr/share/themes")
+    for i in loctions:
+        location_to_check = os.path.join(i,name,"index.theme")
+        try:
+            if os.path.isfile(location_to_check):
+                return (name,GLib.path_get_dirname(location_to_check),location_to_check)
+        except Exception as e :
+            print(e)
+            
+    return False
+    
+def if_icon_exists(name):
+    loctions = (os.path.join(GLib.get_user_data_dir(),"icons"),os.path.join(GLib.get_home_dir(),".icons"),"/usr/share/icons")
+    for i in loctions:
+        location_to_check = os.path.join(i,name,"index.theme")
+        try:
+            if os.path.isfile(location_to_check):
+                return (name,GLib.path_get_dirname(location_to_check),location_to_check)
+        except Exception as e :
+            print(e)
+            continue
+    return False
+    
+
+
+class GnomeShell(object):
+    def __init__(self):
+        self.__bus                    = dbus.SessionBus()
+        self.__id                     = "org.gnome.Shell"
+        self.__object                 = "/org/gnome/Shell"
+        self.__interface_properties   = "org.freedesktop.DBus.Properties"
+        self.__interface_extensions   = "org.gnome.Shell.Extensions"
+        self.__proxy                  = self.__bus.get_object(self.__id,self.__object)
+        self.__interface_p            = dbus.Interface(self.__proxy,self.__interface_properties)
+        self.__interface_e            = dbus.Interface(self.__proxy,self.__interface_extensions)
+        self.__settings = Gio.Settings(schema='org.gnome.shell')
+
+    def change_settings(self,schema,settings,timeout=1):
+        try:
+            __settings = Gio.Settings(schema=schema)
+            for s in settings:
+                print(s)
+                __settings.set_value(s[0],s[1])
+                time.sleep(timeout)
+        except Exception as e:
+            print(e)
+            
+    def change_settings_with_path(self,schema,path,settings,timeout=1):
+        try:
+            __settings = Gio.Settings.new_with_path(schema,path)
+            for s in settings:
+                __settings.set_value(s[0],s[1])
+                time.sleep(timeout)
+        except Exception as e:
+            print(e)
+            
+    def change_settings_default_gnome_terminal_profile(self,settings,timeout=1):
+        self.change_settings_with_path("org.gnome.Terminal.Legacy.Profile","/org/gnome/terminal/legacy/profiles:/:{}/".format(self.get_default_gnome_terminal_profile()),settings,timeout)
+        
+    def get_default_gnome_terminal_profile(self):
+        return eval(subprocess.check_output("gsettings get org.gnome.Terminal.ProfilesList list",shell=True).decode("utf-8").strip())[0]
+        
+    def version(self):
+        return self.__interface_p.Get(self.__interface_extensions,"ShellVersion")
+    
+    def list_extensions(self):
+        result = {}
+        for k,v in self.__interface_e.ListExtensions().items():
+            result.setdefault(k,True if v["state"]==1.0 else False)
+        return result
+        
+    def list_enabled_extensions(self):
+        result = []
+        for k,v in self.__interface_e.ListExtensions().items():
+            if v["state"]==1.0:
+                result.append(k)
+        return result
+
+    def list_disabled_extensions(self):
+        result = []
+        for k,v in self.__interface_e.ListExtensions().items():
+            if v["state"]!=1.0:
+                result.append(k)
+        return result
+
+    def installremoteextension(self,uuid):
+        output= self.__interface_e.InstallRemoteExtension(uuid)
+        if output.startswith("succe"):
+            return True
+        return False
+        
+    def enable_extensions(self,extensions):
+        ex = self.__settings.get_strv("enabled-extensions")
+        for extension in extensions:
+            if extension not in ex:
+                ex.append(extension)
+
+        self.__settings.set_strv("enabled-extensions", ex)
+
+        
+    def disable_extensions(self,extensions):
+        ex = self.__settings.get_strv("enabled-extensions")
+        for extension in extensions:
+            while extension  in ex:
+                ex.remove(extension)
+        self.__settings.set_strv("enabled-extensions", ex)
+
+
+
+def main():
+    init_check()
+    if not if_theme_exists(theme_gtk):
+        print("Gtk Theme {} Not Available.".format(theme_gtk))
+        return
+
+    if not if_theme_exists(theme_gnome):
+        print("Gnome Shell Theme {} Not Available.".format(theme_gnome))
+        return
+        
+    if not if_icon_exists(theme_icon):
+        print("Icon Theme {} Not Available.".format(theme_icon))
+        return
+
+    if not if_icon_exists(theme_cursor_icon):
+        print("Cursor Icon Theme {} Not Available.".format(theme_cursor_icon))
+        return
+        
+    if not os.path.isfile(wallpaper):
+        print("Wallpaper {} Not Available.".format(wallpaper))
+        return
+        
+    gnome =  GnomeShell()
+    extensions_to_install = list()
+    all_extension = gnome.list_extensions().keys()
+    for i in extensions_to_enable:
+        if i not in all_extension:
+            extensions_to_install.append(i)
+    if extensions_to_install:
+        for i in extensions_to_install:
+            if not gnome.installremoteextension(i):
+                print("install {} Faild.".format(i))
+                return
+    
+    gnome.disable_extensions(all_extension)
+    gnome.enable_extensions(extensions_to_enable)
+    
+    gnome.change_settings_default_gnome_terminal_profile(gnome_terminal)
+    
+    for v in gsettings:
+        gnome.change_settings(v[0],[(v[1],v[2])])
+    
+    subprocess.call("dconf write /org/gnome/shell/extensions/dash-to-dock/apply-custom-theme false",shell=True)
+    subprocess.call("dconf write /org/gnome/shell/extensions/dash-to-dock/dock-position \"'BOTTOM'\"",shell=True)
+    
+    print("\n\nRestart Your System.")
+    print("Done.")
+    
+    
+if __name__ == "__main__":
+    main()
