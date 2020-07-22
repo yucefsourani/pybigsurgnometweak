@@ -1,6 +1,6 @@
 Name:           pybigsurgnometweak
 Version:        1.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Python Script To change Gnome Shell look
 License:        GPLv3     
 URL:            https://github.com/yucefsourani/pybigsurgnometweak
@@ -40,5 +40,8 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Sun Jul 19 2020 yucefsourani <youssef.m.sourani@gmail.com> - 1.0-2
+- Release 2
+
 * Sun Jul 19 2020 yucefsourani <youssef.m.sourani@gmail.com> - 1.0-1
 - Initial
