@@ -2,7 +2,7 @@
 
 https://arfedora.blogspot.com
 
-Python Script To change Gnome Shell look .
+Python Script To change Gnome Shell look (Fedora Only).
 
 
 # Screenshot
