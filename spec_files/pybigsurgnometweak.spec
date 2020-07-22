@@ -11,7 +11,10 @@ Requires:       pygobject3
 Requires:       python3-gobject
 Requires:       gtk3
 Requires:       python3-dbus
-
+Requires:       WhiteSur-gtk-theme
+Requires:       sur-white-Wallpaper 
+Requires:       McMojave-cursors
+Requires:       BigSur-icon-theme
    
 
 %description
