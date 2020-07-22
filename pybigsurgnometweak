@@ -227,6 +227,7 @@ def main():
                     ["org.gnome.desktop.screensaver"              , "picture-uri",GLib.Variant('s',"file://{}".format(wallpaper))] ,
                     ["org.gnome.desktop.interface"                , "icon-theme",GLib.Variant('s',theme_icon)] ,
                     ["org.gnome.shell.extensions.user-theme"      , "name",GLib.Variant('s',theme_gnome)] ,
+                    ["org.gnome.desktop.interface"                , "cursor-theme",GLib.Variant('s',theme_cursor_icon)] ,
                     ["org.gnome.desktop.interface"                , "gtk-theme",GLib.Variant('s',theme_gtk)] ,
                     ["org.gnome.desktop.interface"                , "enable-animations",GLib.Variant('b',True)] ,
                     ["org.gnome.desktop.wm.preferences"           , "button-layout",GLib.Variant('s',":minimize,close")] ,
