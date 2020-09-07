@@ -1,5 +1,5 @@
 Name:           WhiteSur-gtk-theme
-Version:        2020.07.19
+Version:        2020.09.07
 Release:        1%{?dist}
 Summary:        WhiteSur is a MacOS Big Sur like theme
 BuildArch:      noarch
@@ -39,5 +39,8 @@ mkdir -p %{buildroot}%{_datadir}/themes
 
 
 %changelog
+* Sun Jul 19 2020 yucefsourani <youssef.m.sourani@gmail.com> - 2020.09.07-1
+- Version 2020.09.07
+
 * Sun Jul 19 2020 yucefsourani <youssef.m.sourani@gmail.com> - 2020.07.19-1
 - Initial
