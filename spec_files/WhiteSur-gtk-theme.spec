@@ -32,7 +32,7 @@ mkdir -p %{buildroot}%{_datadir}/themes
 ./install.sh --dest %{buildroot}%{_datadir}/themes --icon fedora 
 
 %files
-%license LICENSE 
+%license COPYING 
 %doc README.md  AUTHORS 
 %{_datadir}/themes/WhiteSur-*
 
